@@ -3,9 +3,9 @@ require 'minitest/autorun'
 require_relative '../lib/refine.rb'
 
 class TestRefine < MiniTest::Unit::TestCase
-	
+
   def setup
-    @refine_project = Refine.new({ "project_name" => 'date_cleanup', "file_name" => '../test/dates.txt' })
+    @refine_project = Refine.new({ "project_name" => 'date_cleanup', "file_name" => './test/dates.txt' })
   end
 	
 	def test_refine_initializer_has_instance_variable_project_name
@@ -21,11 +21,11 @@ class TestRefine < MiniTest::Unit::TestCase
   end
   
   def test_apply_operations
-    assert @refine_project.apply_operations( '../test/operations.json' )
+    assert @refine_project.apply_operations( './test/operations.json' )
   end
   
   def test_call
-     assert @refine_project.call( 'apply-operations', 'operations' => File.read( 'operations.json' ) )
+     assert @refine_project.call( 'apply-operations', 'operations' => File.read( './test/operations.json' ) )
   end
     
   def after_tests
