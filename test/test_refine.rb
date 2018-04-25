@@ -29,6 +29,33 @@ describe Refine do
      assert @refine_project.call( 'apply-operations', 'operations' => File.read( './test/operations.json' ) )
   end
 
+  describe "deep linking into a facet state" do
+    it "generates a link to the server"
+    it "succeeds, with status 200 and a document"
+
+    describe "sets up facets for us automatically" do
+      it "one at a time"
+      it "many at once"
+
+      describe "with custom expressions" do
+        it "has a `value` expression by default"
+
+        # our own expression
+      end
+
+      describe "with custom sorting" do
+
+        it "sorts by `name` by default"
+        it "sorts by `count` when specified"
+      end
+
+      describe "inverstion" do
+        it "default"
+        it "specified"
+      end
+    end
+  end
+
   after do
     @refine_project.delete_project
   end
