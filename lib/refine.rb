@@ -27,12 +27,12 @@ class Refine
       @project_name = CGI.escape(metadata["name"])
     end
   end
-  
+
   def create_project(project_name, file_name)
     uri = @server + "/command/core/create-project-from-upload"
     project_id = false
     File.open(file_name) do |file|
-      body = { 
+      body = {
         'project-file' => file,
         'project-name' => project_name
       }
@@ -107,6 +107,28 @@ class Refine
 
     response
   end
+
+  def link_to_facets(column_name)
+    @server + "/project?project=1527751520258"
+  end
+
+  def facet_parameters(*column_names)
+    column_names.map do |x|
+      case x when String then
+      {"c" => {
+        "columnName" => x,
+        "expression"=>"value",
+        "name"=> x}}
+      when Hash
+        {"c" => {
+          "columnName" => x.keys.first,
+          "expression"=>x.values.first,
+          "name"=> x.keys.first}}
+      end
+    end
+  end
+
+
 
   def method_missing(method, *args)
     # translate: get_column_info --> get-column-info
