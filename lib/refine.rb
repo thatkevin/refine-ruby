@@ -113,17 +113,33 @@ class Refine
   end
 
   def facet_parameters(*column_names)
-    column_names.map do |x|
-      case x when String then
-      {"c" => {
-        "columnName" => x,
-        "expression"=>"value",
-        "name"=> x}}
+    column_names.map do |column|
+      case column when String then
+      {
+        "c" => {
+          "columnName" => column,
+          "expression"=>"value",
+          "name"=> column,
+          "invert"=> false
+        },
+        "o" => {
+          "sort" => "name"
+        }
+      }
       when Hash
-        {"c" => {
-          "columnName" => x.keys.first,
-          "expression"=>x.values.first,
-          "name"=> x.keys.first}}
+        sort_by = column.values.first.include? "sort_count"
+        invert = column.values.first.include? "invert"
+          {
+            "c" => {
+              "columnName" => column.keys.first,
+              "expression"=>column.values.first,
+              "name"=> column.keys.first,
+              "invert" => invert ? true : false
+            },
+            "o" => {
+              "sort" => sort_by ? "count" : "name"
+            }
+          }
       end
     end
   end
@@ -139,4 +155,5 @@ class Refine
     def client
       @client ||= HTTPClient.new(@server)
     end
+
 end

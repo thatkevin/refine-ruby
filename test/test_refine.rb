@@ -30,9 +30,6 @@ describe Refine do
   end
 
   describe "deep linking into a facet state" do
-    before do
-
-    end
 
     describe "depends on generating a ui query" do
       describe "valid facet query" do
@@ -87,14 +84,30 @@ describe Refine do
       end
 
       describe "with custom sorting" do
+        # this adds an 'o' data structure for order
 
-        it "sorts by `name` by default"
-        it "sorts by `count` when specified"
+        it "sorts by `name` by default" do # ie existing test cases
+          date_facet = @refine_project.facet_parameters("Date")
+          assert_equal "name", date_facet.first.fetch("o").fetch("sort")
+        end
+
+        it "sorts by `count` when specified" do # need to choose a new signature / api
+          date_facet =@refine_project.facet_parameters({"Date"=>["date.utcTime()", "sort_count"]})
+          assert_equal "count", date_facet.first.fetch("o").fetch("sort")
+
+        end
       end
 
-      describe "inverstion" do
-        it "default"
-        it "specified"
+      describe "inversion" do
+        # find where to put these arguments in, probably 'c'
+        it "default's to not inverted" do
+          date_facet = @refine_project.facet_parameters("Date")
+          assert_equal false, date_facet.first.fetch("c").fetch("invert")
+        end
+        it "can specify to invert" do
+          date_facet = @refine_project.facet_parameters({"Date"=>["date.utcTime()", "invert"]})
+          assert_equal true, date_facet.first.fetch("c").fetch("invert")
+        end
       end
     end
 
