@@ -1,6 +1,7 @@
 require 'httpclient'
 require 'cgi'
 require 'json'
+require "addressable/uri"
 
 class Refine
   attr_reader :project_name
@@ -108,9 +109,19 @@ class Refine
     response
   end
 
-  def link_to_facets(column_name)
-    @server + "/project?project=1527751520258"
+  def link_to_facets(*column_names)
+    uri = Addressable::URI.parse("#{@server}/project")
+
+    facet = facet_parameters(*column_names)
+
+    json_facet=JSON::dump(facets: facet).gsub(' ', "\t")
+
+    uri.query = Addressable::URI::form_encode({project: @project_id, ui: json_facet})
+
+    uri.to_s.gsub("%09", "%20")
+
   end
+
 
   def facet_parameters(*column_names)
     column_names.map do |column|
@@ -127,17 +138,17 @@ class Refine
         }
       }
       when Hash
-        sort_by = column.values.first.include? "sort_count"
-        invert = column.values.first.include? "invert"
+        expression, sort_by, invert = facet_opts(column.values.first)
+
           {
             "c" => {
               "columnName" => column.keys.first,
-              "expression"=>column.values.first,
+              "expression"=> expression,
               "name"=> column.keys.first,
-              "invert" => invert ? true : false
+              "invert" => invert
             },
             "o" => {
-              "sort" => sort_by ? "count" : "name"
+              "sort" => sort_by
             }
           }
       end
@@ -152,6 +163,28 @@ class Refine
   end
 
   protected
+    def facet_opts(opts_array)
+      if opts_array.is_a? String
+        expression_present = opts_array.include? "value"
+        expression = expression_present ? opts_array : "value"
+      else
+        expression_present = opts_array[0].include? "value"
+        expression = expression_present ? opts_array[0] : "value"
+      end
+
+      sort_by = opts_array.include? "sort_count"
+      invert = opts_array.include? "invert"
+
+      sort_by = sort_by ? "count" : "name"
+      invert = invert ? true : false
+
+      return escape_backticks(expression), sort_by, invert
+    end
+
+    def escape_backticks(string)
+      string.gsub('//','////')
+    end
+
     def client
       @client ||= HTTPClient.new(@server)
     end
