@@ -17,9 +17,9 @@ describe Refine do
     assert_equal new_refine_project.project_name, finding_new_refine_project_using_id.project_name
   end
 
-	it "refine_initializer_has_instance_variable_project_name" do
-		assert_equal 'date_cleanup', @refine_project.project_name
-	end
+  it "refine_initializer_has_instance_variable_project_name" do
+    assert_equal 'date_cleanup', @refine_project.project_name
+  end
 
   it "refine_initializer_has_instance_variable_project_id" do
     assert @refine_project.project_id.match(/^[0-9]+$/)
