@@ -164,19 +164,18 @@ class Refine
 
   protected
     def facet_opts(opts_array)
-      if opts_array.is_a? String
-        expression_present = opts_array.include? "value"
-        expression = expression_present ? opts_array : "value"
+      expression_or_flag, *flags = opts_array
+
+      expression, flags = case expression_or_flag when String then
+        [expression_or_flag, flags]
       else
-        expression_present = opts_array[0].include? "value"
-        expression = expression_present ? opts_array[0] : "value"
+        ["value", [expression_or_flag, *flags]]
       end
 
-      sort_by = opts_array.include? "sort_count"
-      invert = opts_array.include? "invert"
+      sort_by = flags.include? :sort_count
+      invert = flags.include? :invert
 
       sort_by = sort_by ? "count" : "name"
-      invert = invert ? true : false
 
       return escape_backticks(expression), sort_by, invert
     end

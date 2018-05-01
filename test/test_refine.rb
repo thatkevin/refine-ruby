@@ -136,7 +136,7 @@ describe Refine do
         end
 
         it "sorts by `count` when specified" do # need to choose a new signature / api
-          date_facet =@refine_project.facet_parameters({"Date"=>["value.utcTime()", "sort_count"]})
+          date_facet =@refine_project.facet_parameters({"Date"=>["value.utcTime()", :sort_count]})
           assert_equal "count", date_facet.first.fetch("o").fetch("sort")
 
         end
@@ -149,7 +149,7 @@ describe Refine do
           assert_equal false, date_facet.first.fetch("c").fetch("invert")
         end
         it "can specify to invert" do
-          date_facet = @refine_project.facet_parameters({"Date"=>["value.utcTime()", "invert"]})
+          date_facet = @refine_project.facet_parameters({"Date"=>["value.utcTime()", :invert]})
           assert_equal true, date_facet.first.fetch("c").fetch("invert")
         end
       end
