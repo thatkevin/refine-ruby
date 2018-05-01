@@ -41,7 +41,7 @@ describe Refine do
 
   describe "deep linking into a facet state" do
 
-    it "creates working url for custom expressions which include spilting a string with spaces (i.e. value.split(/[ -\/]/) )" do
+    it "creates working url for custom expressions which include splitting a string with spaces (i.e. value.split(/[ -\/]/) )" do
       facet_url = @refine_project.link_to_facets({"company"=>'filter(forEach(forEach(value.split(/[ -\/]/),v,v.replace(/^[^\w\s]/,"")    ),v2,v2.replace(/[^\w\s]$/,"").toLowercase()),i,isNonBlank(i))'})
       assert_includes facet_url, "filter%28forEach%28forEach%28value.split%28%2F%5B%20-%5C%5C%2F%5D%2F%29%2Cv%2Cv.replace%28%2F%5E%5B%5E%5C%5Cw%5C%5Cs%5D%2F%2C%5C%22%5C%22%29%20%20%20%20%29%2Cv2%2Cv2.replace%28%2F%5B%5E%5C%5Cw%5C%5Cs%5D%24%2F%2C%5C%22%5C%22%29.toLowercase%28%29%29%2Ci%2CisNonBlank%28i%29%29%22%2C%22name%22%3A%22company%22%2C%22invert%22%3Afalse%7D%2C%22o%22%3A%7B%22sort%22%3A%22name%22%7D%7D%5D%7D"
     end
@@ -136,7 +136,7 @@ describe Refine do
         end
 
         it "sorts by `count` when specified" do # need to choose a new signature / api
-          date_facet =@refine_project.facet_parameters({"Date"=>["value.utcTime()", :sort_count]})
+          date_facet = @refine_project.facet_parameters({"Date"=>["value.utcTime()", :sort_count]})
           assert_equal "count", date_facet.first.fetch("o").fetch("sort")
 
         end
