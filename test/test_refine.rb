@@ -15,6 +15,8 @@ describe Refine do
     finding_new_refine_project_using_id = Refine.new("project_id"=> new_refine_project.project_id)
 
     assert_equal new_refine_project.project_name, finding_new_refine_project_using_id.project_name
+
+    new_refine_project.delete_project
   end
 
   it "refine_initializer_has_instance_variable_project_name" do
@@ -156,12 +158,6 @@ describe Refine do
     it "generates a link to the server" do
       assert(URI::HTTP === URI::parse(@refine_project.link_to_facets("Date")))
     end
-
-    # @refine_project.link_to_facets(...)
-    # => http://foo.bar/project/adfasdfsdf
-    # it "succeeds, with status 200 and a document" do
-    #   assert(HTTPClient.get(@refine_project.link_to_facets("Date")).code == 200)
-    # end
   end
 
   after do
