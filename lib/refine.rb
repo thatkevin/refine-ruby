@@ -1,6 +1,7 @@
 require 'httpclient'
 require 'cgi'
 require 'json'
+require "addressable/uri"
 
 class Refine
   attr_reader :project_name
@@ -27,12 +28,12 @@ class Refine
       @project_name = CGI.escape(metadata["name"])
     end
   end
-  
+
   def create_project(project_name, file_name)
     uri = @server + "/command/core/create-project-from-upload"
     project_id = false
     File.open(file_name) do |file|
-      body = { 
+      body = {
         'project-file' => file,
         'project-name' => project_name
       }
@@ -108,13 +109,83 @@ class Refine
     response
   end
 
+  def link_to_facets(*column_names)
+    uri = Addressable::URI.parse("#{@server}/project")
+
+    facet = facet_parameters(*column_names)
+
+    json_facet=JSON::dump(facets: facet).gsub(' ', "\t")
+
+    uri.query = Addressable::URI::form_encode({project: @project_id, ui: json_facet})
+
+    uri.to_s.gsub("%09", "%20")
+
+  end
+
+
+  def facet_parameters(*column_names)
+    column_names.map do |column|
+      case column when String then
+      {
+        "c" => {
+          "columnName" => column,
+          "expression"=>"value",
+          "name"=> column,
+          "invert"=> false
+        },
+        "o" => {
+          "sort" => "name"
+        }
+      }
+      when Hash
+        expression, sort_by, invert = facet_opts(column.values.first)
+
+          {
+            "c" => {
+              "columnName" => column.keys.first,
+              "expression"=> expression,
+              "name"=> column.keys.first,
+              "invert" => invert
+            },
+            "o" => {
+              "sort" => sort_by
+            }
+          }
+      end
+    end
+  end
+
+
+
   def method_missing(method, *args)
     # translate: get_column_info --> get-column-info
     call(method.to_s.gsub('_', '-'), *args)
   end
 
   protected
+    def facet_opts(opts_array)
+      expression_or_flag, *flags = opts_array
+
+      expression, flags = case expression_or_flag when String then
+        [expression_or_flag, flags]
+      else
+        ["value", [expression_or_flag, *flags]]
+      end
+
+      sort_by = flags.include? :sort_count
+      invert = flags.include? :invert
+
+      sort_by = sort_by ? "count" : "name"
+
+      return escape_backticks(expression), sort_by, invert
+    end
+
+    def escape_backticks(string)
+      string.gsub('//','////')
+    end
+
     def client
       @client ||= HTTPClient.new(@server)
     end
+
 end
