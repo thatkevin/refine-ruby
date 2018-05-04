@@ -9,7 +9,7 @@ class Refine
 
   def self.get_all_project_metadata(server="http://127.0.0.1:3333")
     uri = "#{server}/command/core/get-all-project-metadata"
-    response = HTTPClient.new(server).get(uri)
+    response = HTTPClient.new().get(uri)
     JSON.parse(response.body)
   end
 
@@ -185,7 +185,7 @@ class Refine
     end
 
     def client
-      @client ||= HTTPClient.new(@server)
+      @client ||= HTTPClient.new()
     end
 
 end
