@@ -122,6 +122,21 @@ class Refine
 
   end
 
+    def compute_facet_post(*column_names)
+      formatted = column_names.map do |column|
+        expression, sort_by, invert = facet_opts(column.values.first)
+        {
+          "columnName" => column.keys.first,
+          "expression" => expression,
+          "name" => column.keys.first,
+          "invert" => invert,
+          "sort" => sort_by,
+          "selection" => []
+        }
+      end
+      json_facet = JSON::dump(facets: [formatted.first])
+      compute_facets("engine"=> json_facet)
+    end
 
   def facet_parameters(*column_names)
     column_names.map do |column|
@@ -164,18 +179,19 @@ class Refine
 
   protected
     def facet_opts(opts_array)
-      expression_or_flag, *flags = opts_array
-
-      expression, flags = case expression_or_flag when String then
-        [expression_or_flag, flags]
+      if opts_array.is_a? String
+        expression_present = opts_array.include? "value"
+        expression = expression_present ? opts_array : "value"
       else
-        ["value", [expression_or_flag, *flags]]
+        expression_present = opts_array[0].include? "value"
+        expression = expression_present ? opts_array[0] : "value"
       end
 
-      sort_by = flags.include? :sort_count
-      invert = flags.include? :invert
+      sort_by = opts_array.include? "sort_count"
+      invert = opts_array.include? "invert"
 
       sort_by = sort_by ? "count" : "name"
+      invert = invert ? true : false
 
       return escape_backticks(expression), sort_by, invert
     end

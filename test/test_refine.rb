@@ -15,13 +15,11 @@ describe Refine do
     finding_new_refine_project_using_id = Refine.new("project_id"=> new_refine_project.project_id)
 
     assert_equal new_refine_project.project_name, finding_new_refine_project_using_id.project_name
-
-    new_refine_project.delete_project
   end
 
-  it "refine_initializer_has_instance_variable_project_name" do
-    assert_equal 'date_cleanup', @refine_project.project_name
-  end
+	it "refine_initializer_has_instance_variable_project_name" do
+		assert_equal 'date_cleanup', @refine_project.project_name
+	end
 
   it "refine_initializer_has_instance_variable_project_id" do
     assert @refine_project.project_id.match(/^[0-9]+$/)
@@ -41,7 +39,7 @@ describe Refine do
 
   describe "deep linking into a facet state" do
 
-    it "creates working url for custom expressions which include splitting a string with spaces (i.e. value.split(/[ -\/]/) )" do
+    it "creates working url for custom expressions which include spilting a string with spaces (i.e. value.split(/[ -\/]/) )" do
       facet_url = @refine_project.link_to_facets({"company"=>'filter(forEach(forEach(value.split(/[ -\/]/),v,v.replace(/^[^\w\s]/,"")    ),v2,v2.replace(/[^\w\s]$/,"").toLowercase()),i,isNonBlank(i))'})
       assert_includes facet_url, "filter%28forEach%28forEach%28value.split%28%2F%5B%20-%5C%5C%2F%5D%2F%29%2Cv%2Cv.replace%28%2F%5E%5B%5E%5C%5Cw%5C%5Cs%5D%2F%2C%5C%22%5C%22%29%20%20%20%20%29%2Cv2%2Cv2.replace%28%2F%5B%5E%5C%5Cw%5C%5Cs%5D%24%2F%2C%5C%22%5C%22%29.toLowercase%28%29%29%2Ci%2CisNonBlank%28i%29%29%22%2C%22name%22%3A%22company%22%2C%22invert%22%3Afalse%7D%2C%22o%22%3A%7B%22sort%22%3A%22name%22%7D%7D%5D%7D"
     end
@@ -136,7 +134,7 @@ describe Refine do
         end
 
         it "sorts by `count` when specified" do # need to choose a new signature / api
-          date_facet = @refine_project.facet_parameters({"Date"=>["value.utcTime()", :sort_count]})
+          date_facet =@refine_project.facet_parameters({"Date"=>["value.utcTime()", "sort_count"]})
           assert_equal "count", date_facet.first.fetch("o").fetch("sort")
 
         end
@@ -149,15 +147,38 @@ describe Refine do
           assert_equal false, date_facet.first.fetch("c").fetch("invert")
         end
         it "can specify to invert" do
-          date_facet = @refine_project.facet_parameters({"Date"=>["value.utcTime()", :invert]})
+          date_facet = @refine_project.facet_parameters({"Date"=>["value.utcTime()", "invert"]})
           assert_equal true, date_facet.first.fetch("c").fetch("invert")
         end
+      end
+    end
+
+    describe "compute_facets" do
+      it "Request responds with error due to non existent column" do
+        response = @refine_project.compute_facet_post({"transcript_fiscal_year"=> ["isNonBlank(value)"]})
+        assert_equal({"facets"=>[{"name"=>"transcript_fiscal_year", "expression"=>"isNonBlank(value)", "columnName"=>"transcript_fiscal_year", "invert"=>false, "error"=>"No column named transcript_fiscal_year"}], "mode"=>"row-based"}, response)
+      end
+
+      it "Request executes expression and sends response with the results" do
+        response = @refine_project.compute_facet_post({"Column 1"=> ["isNonBlank(value)"]})
+        assert_equal({"facets"=>[{"name"=>"Column 1", "expression"=>"isNonBlank(value)", "columnName"=>"Column 1", "invert"=>false, "choices"=>[{"v"=>{"v"=>true, "l"=>"true"}, "c"=>4, "s"=>false}]}], "mode"=>"row-based"}, response)
+      end
+
+      it "Request with faulty expression" do
+        response = @refine_project.compute_facet_post({"Column 1"=> ["iBlank(value)"]})
+        assert_equal({"facets"=>[{"name"=>"Column 1", "expression"=>"iBlank(value)", "columnName"=>"Column 1", "invert"=>false, "error"=>"Parsing error at offset 6: Unknown function or control named iBlank"}], "mode"=>"row-based"}, response)
       end
     end
 
     it "generates a link to the server" do
       assert(URI::HTTP === URI::parse(@refine_project.link_to_facets("Date")))
     end
+
+    # @refine_project.link_to_facets(...)
+    # => http://foo.bar/project/adfasdfsdf
+    # it "succeeds, with status 200 and a document" do
+    #   assert(HTTPClient.get(@refine_project.link_to_facets("Date")).code == 200)
+    # end
   end
 
   after do
