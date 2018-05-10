@@ -2,6 +2,7 @@ require 'httpclient'
 require 'cgi'
 require 'json'
 require "addressable/uri"
+require 'pry'
 
 class Refine
   attr_reader :project_name
@@ -9,7 +10,7 @@ class Refine
 
   def self.get_all_project_metadata(server="http://127.0.0.1:3333")
     uri = "#{server}/command/core/get-all-project-metadata"
-    response = HTTPClient.new(server).get(uri)
+    response = HTTPClient.new().get(uri)
     JSON.parse(response.body)
   end
 
@@ -122,6 +123,43 @@ class Refine
 
   end
 
+    def compute_facet(*column_names)
+
+      formatted = column_names.map do |column|
+        expression, sort_by, invert = facet_opts(column.values.first)
+        {
+          "columnName" => column.keys.first,
+          "expression" => expression,
+          "name" => column.keys.first,
+          "invert" => invert,
+          "sort" => sort_by,
+          "selection" => []
+        }
+      end
+
+      json_facet = JSON::dump(facets: [formatted.first])
+
+      openrefine_response = compute_facets("engine" => json_facet)
+
+      facet_response = openrefine_response.fetch("facets").first
+
+
+
+      if facet_response.key?("choices")
+
+        choice_hash = facet_response.fetch("choices").map do |h|
+          Hash[%w(value label count selection).zip([h["v"]["v"], h["v"]["l"], h["c"], h["s"]])]
+        end
+
+        response = choice_hash.inject({}) do |hash, choice|
+          hash.merge(choice["value"] => choice["count"])
+        end
+
+      else
+      response = "Error: " + facet_response.fetch("error")
+      end
+
+    end
 
   def facet_parameters(*column_names)
     column_names.map do |column|
@@ -164,18 +202,19 @@ class Refine
 
   protected
     def facet_opts(opts_array)
-      expression_or_flag, *flags = opts_array
-
-      expression, flags = case expression_or_flag when String then
-        [expression_or_flag, flags]
+      if opts_array.is_a? String
+        expression_present = opts_array.include? "value"
+        expression = expression_present ? opts_array : "value"
       else
-        ["value", [expression_or_flag, *flags]]
+        expression_present = opts_array[0].include? "value"
+        expression = expression_present ? opts_array[0] : "value"
       end
 
-      sort_by = flags.include? :sort_count
-      invert = flags.include? :invert
+      sort_by = opts_array.include? "sort_count"
+      invert = opts_array.include? "invert"
 
       sort_by = sort_by ? "count" : "name"
+      invert = invert ? true : false
 
       return escape_backticks(expression), sort_by, invert
     end
@@ -185,7 +224,7 @@ class Refine
     end
 
     def client
-      @client ||= HTTPClient.new(@server)
+      @client ||= HTTPClient.new()
     end
 
 end
