@@ -2,6 +2,7 @@ require 'httpclient'
 require 'cgi'
 require 'json'
 require "addressable/uri"
+require 'pry'
 
 class Refine
   attr_reader :project_name
@@ -122,7 +123,8 @@ class Refine
 
   end
 
-    def compute_facet_post(*column_names)
+    def compute_facet(*column_names)
+
       formatted = column_names.map do |column|
         expression, sort_by, invert = facet_opts(column.values.first)
         {
@@ -134,8 +136,29 @@ class Refine
           "selection" => []
         }
       end
+
       json_facet = JSON::dump(facets: [formatted.first])
-      compute_facets("engine"=> json_facet)
+
+      openrefine_response = compute_facets("engine" => json_facet)
+
+      facet_response = openrefine_response.fetch("facets").first
+
+
+
+      if facet_response.key?("choices")
+
+        choice_hash = facet_response.fetch("choices").map do |h|
+          Hash[%w(value label count selection).zip([h["v"]["v"], h["v"]["l"], h["c"], h["s"]])]
+        end
+
+        response = choice_hash.inject({}) do |hash, choice|
+          hash.merge(choice["value"] => choice["count"])
+        end
+
+      else
+      response = "Error: " + facet_response.fetch("error")
+      end
+
     end
 
   def facet_parameters(*column_names)

@@ -155,18 +155,18 @@ describe Refine do
 
     describe "compute_facets" do
       it "Request responds with error due to non existent column" do
-        response = @refine_project.compute_facet_post({"transcript_fiscal_year"=> ["isNonBlank(value)"]})
-        assert_equal({"facets"=>[{"name"=>"transcript_fiscal_year", "expression"=>"isNonBlank(value)", "columnName"=>"transcript_fiscal_year", "invert"=>false, "error"=>"No column named transcript_fiscal_year"}], "mode"=>"row-based"}, response)
+        response = @refine_project.compute_facet({"transcript_fiscal_year"=> ["isNonBlank(value)"]})
+        assert_equal("Error: No column named transcript_fiscal_year", response)
       end
 
       it "Request executes expression and sends response with the results" do
-        response = @refine_project.compute_facet_post({"Column 1"=> ["isNonBlank(value)"]})
-        assert_equal({"facets"=>[{"name"=>"Column 1", "expression"=>"isNonBlank(value)", "columnName"=>"Column 1", "invert"=>false, "choices"=>[{"v"=>{"v"=>true, "l"=>"true"}, "c"=>4, "s"=>false}]}], "mode"=>"row-based"}, response)
+        response = @refine_project.compute_facet({"Column 1"=> ["isNonBlank(value)"]})
+        assert_equal({true=>4}, response)
       end
 
       it "Request with faulty expression" do
-        response = @refine_project.compute_facet_post({"Column 1"=> ["iBlank(value)"]})
-        assert_equal({"facets"=>[{"name"=>"Column 1", "expression"=>"iBlank(value)", "columnName"=>"Column 1", "invert"=>false, "error"=>"Parsing error at offset 6: Unknown function or control named iBlank"}], "mode"=>"row-based"}, response)
+        response = @refine_project.compute_facet({"Column 1"=> ["iBlank(value)"]})
+        assert_equal("Error: Parsing error at offset 6: Unknown function or control named iBlank", response)
       end
     end
 
