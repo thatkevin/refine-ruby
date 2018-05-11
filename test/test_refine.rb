@@ -9,6 +9,48 @@ describe Refine do
     @refine_project = Refine.new({ "project_name" => 'date_cleanup', "file_name" => './test/dates.txt' })
   end
 
+  describe "error handling" do
+    it "throws an RuntimeError when @throws_exceptions == true (default)" do
+      faulty_operations = '[
+      "op": "core/text-transform",
+      "description": "Text transform on cells in column Date using expression grel:value.toDate()",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "onError": "set-to-blank",
+      "repeat": false,
+      "repeatCount": 10
+    }
+    ]'
+      proc {@refine_project.apply_operations(faulty_operations)}.must_raise RuntimeError
+    end
+
+    it "responds with error as a ruby hash when @throws_exceptions == false" do
+      @refine_project = Refine.new({ "project_name" => 'date_cleanup', "file_name" => './test/dates.txt', "throws_exceptions" => false })
+      faulty_operations = '[
+            "op": "core/text-transform",
+            "description": "Text transform on cells in column Date using expression grel:value.toDate()",
+            "engineConfig": {
+              "facets": [],
+              "mode": "row-based"
+            },
+            "onError": "set-to-blank",
+            "repeat": false,
+            "repeatCount": 10
+          }
+        ]'
+
+       _(@refine_project.apply_operations(faulty_operations)).must_equal (
+         {"stack"=>
+  "org.json.JSONException: Expected a ',' or ']' at 19 [character 17 line 2]\n\tat org.json.JSONTokener.syntaxError(JSONTokener.java:423)\n\tat org.json.JSONArray.<init>(JSONArray.java:143)\n\tat org.json.JSONTokener.nextValue(JSONTokener.java:356)\n\tat com.google.refine.util.ParsingUtilities.evaluateJsonStringToArray(ParsingUtilities.java:137)\n\tat com.google.refine.commands.history.ApplyOperationsCommand.doPost(ApplyOperationsCommand.java:63)\n\tat com.google.refine.RefineServlet.service(RefineServlet.java:177)\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:820)\n\tat org.mortbay.jetty.servlet.ServletHolder.handle(ServletHolder.java:511)\n\tat org.mortbay.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1166)\n\tat org.mortbay.servlet.UserAgentFilter.doFilter(UserAgentFilter.java:81)\n\tat org.mortbay.servlet.GzipFilter.doFilter(GzipFilter.java:155)\n\tat org.mortbay.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1157)\n\tat org.mortbay.jetty.servlet.ServletHandler.handle(ServletHandler.java:388)\n\tat org.mortbay.jetty.security.SecurityHandler.handle(SecurityHandler.java:216)\n\tat org.mortbay.jetty.servlet.SessionHandler.handle(SessionHandler.java:182)\n\tat org.mortbay.jetty.handler.ContextHandler.handle(ContextHandler.java:765)\n\tat org.mortbay.jetty.webapp.WebAppContext.handle(WebAppContext.java:418)\n\tat org.mortbay.jetty.handler.HandlerWrapper.handle(HandlerWrapper.java:152)\n\tat org.mortbay.jetty.Server.handle(Server.java:326)\n\tat org.mortbay.jetty.HttpConnection.handleRequest(HttpConnection.java:542)\n\tat org.mortbay.jetty.HttpConnection$RequestHandler.content(HttpConnection.java:938)\n\tat org.mortbay.jetty.HttpParser.parseNext(HttpParser.java:755)\n\tat org.mortbay.jetty.HttpParser.parseAvailable(HttpParser.java:218)\n\tat org.mortbay.jetty.HttpConnection.handle(HttpConnection.java:404)\n\tat org.mortbay.jetty.bio.SocketConnector$Connection.run(SocketConnector.java:228)\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)\n\tat java.lang.Thread.run(Thread.java:745)\n",
+ "code"=>"error",
+ "message"=>"Expected a ',' or ']' at 19 [character 17 line 2]"}
+       )
+    end
+
+  end
+
   it "finding project through project id" do
     new_refine_project = Refine.new({"project_name" => 'date_cleanup', "file_name" => './test/dates.txt'})
 
