@@ -37,6 +37,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake", "~> 10.0"
   s.add_development_dependency "minitest", "~> 5.11"
   s.add_development_dependency "pry"
-  s.add_development_dependency 'addressable', '~> 2.5'
+  s.add_dependency 'addressable', '~> 2.5'
 
 end
