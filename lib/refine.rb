@@ -16,7 +16,8 @@ class Refine
 
   def initialize(opts = {})
     @server = opts["server"] || "http://127.0.0.1:3333"
-    @throws_exceptions = opts["throws_exceptions"] || true
+
+     @throws_exceptions = opts["throws_exceptions"] === false ? false : true
 
     if opts["file_name"] && !opts["file_name"].empty? && opts["project_name"] && !opts["project_name"].empty?
       project_name = CGI.escape(opts["project_name"])
@@ -49,7 +50,7 @@ class Refine
   end
 
   def apply_operations(file_name_or_string)
-    if File.exists?(file_name_or_string)
+    if File.exist?(file_name_or_string)
       operations = File.read(file_name_or_string)
     else
       operations = file_name_or_string
