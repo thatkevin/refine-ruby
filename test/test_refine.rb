@@ -15,6 +15,8 @@ describe Refine do
     finding_new_refine_project_using_id = Refine.new("project_id"=> new_refine_project.project_id)
 
     assert_equal new_refine_project.project_name, finding_new_refine_project_using_id.project_name
+
+    new_refine_project.delete_project
   end
 
 	it "refine_initializer_has_instance_variable_project_name" do
