@@ -14,22 +14,17 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README.textile"
   ]
-  s.files = [
-    "LICENSE",
-    "README.textile",
-    "Rakefile",
-    "VERSION",
-    "google-refine.gemspec",
-    "lib/google-refine.rb",
-    "test/dates.txt",
-    "test/operations.json",
-    "test/test.rb"
-  ]
+
+  s.files         = `git ls-files -z`.split("\x0").reject do |f|
+    f.match(%r{^(test|spec|features)/})
+  end
+
   s.homepage = "http://github.com/maxogden/refine-ruby"
   s.require_paths = ["lib"]
-  s.test_files = [
-    "test/*"
-  ]
+
+  s.test_files    = `git ls-files -z`.split("\x0").select do |f|
+    f.match(%r{^(test|spec|features)/})
+  end
 
   s.add_dependency('json', ">= 1.4.6")
   s.add_dependency('httpclient', ">= 2.1.6.1")
