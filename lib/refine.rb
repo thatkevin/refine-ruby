@@ -50,7 +50,7 @@ class Refine
   end
 
   def apply_operations(file_name_or_string)
-    if File.exists?(file_name_or_string)
+    if File.exist?(file_name_or_string)
       operations = File.read(file_name_or_string)
     else
       operations = file_name_or_string
