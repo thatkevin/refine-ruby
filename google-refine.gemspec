@@ -1,8 +1,11 @@
 # -*- encoding: utf-8 -*-
+lib = File.expand_path("../lib", __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'refine/version'
 
 Gem::Specification.new do |s|
   s.name = %q{refine-ruby}
-  s.version = "0.2.2"
+  s.version = Refine::VERSION
   s.authors = ["Max Ogden", "Michael Bianco"]
   s.summary = %q{Client library for interacting with Google Refine instances}
   s.description = %q{Client library for interacting with Google Refine instances. Easily work with CSVs from the command line}
