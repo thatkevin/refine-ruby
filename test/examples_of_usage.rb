@@ -1,17 +1,17 @@
 ### NOTE: The internal client-server protocol used by OpenRefine is not yet maintained as a stable external API, subject to change. ###
 ### Therefore, plase indicate changes you notice to kittelmann@sub.uni-goettingen.de ###
 ### Some examples require cURL http://curl.haxx.se ###
-### It is assumed that examples are run from the 'test' directory. Otherwise paths need to be adjusted. 
+### It is assumed that examples are run from the 'test' directory. Otherwise paths need to be adjusted.
 load '../lib/refine.rb'
 
 ##########################
 ### create initial project
 ##########################
-prj = Refine.new({ 'project_name' => 'date_cleanup', 'file_name' => 'dates.csv' })
+prj = Refine.new({ 'project_name' => 'date_cleanup', 'file_name' => 'dates.csv', 'throws_exceptions'=> false })
 
 
 ##########################
-### create another project 
+### create another project
 ##########################
 prj.create_project( 'date_cleanup', 'dates.txt' )                          # return value = project id, example: 1484090391100
 
@@ -21,6 +21,15 @@ prj.create_project( 'date_cleanup', 'dates.txt' )                          # ret
 ################
 prj.apply_operations( 'operations.json' )                                  # return value = status code, example: {'code'=>'ok'}
 
+######################
+### link to facet(s) already set up
+######################
+prj.link_to_facets("Date"=>["isNonBlank(value)"])                          # return value = a link to the facet(s) (method can take multiple facet arguments)
+
+######################
+### compute facet(s)
+######################
+prj.compute_facet({"Date"=>["value"]}, {"Date"=>["isNonBlank(value)"]})    # return value = the computed facets as an array of hashes
 
 ######################
 ### extract operations
@@ -39,8 +48,8 @@ end
 ###############
 ### export data
 ###############
-prj.export_rows                                                              # return value = exported data as tsv 
-prj.export_rows( {'format'=>'tsv'} )                                         # return value = exported data as tsv   
+prj.export_rows                                                              # return value = exported data as tsv
+prj.export_rows( {'format'=>'tsv'} )                                         # return value = exported data as tsv
 prj.export_rows( {'format'=>'csv'} )                                         # return value = exported data as csv
 
 ### export data in custom table format

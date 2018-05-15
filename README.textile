@@ -21,7 +21,7 @@ Given that you have the following raw data:
   </code>
 </pre>
 
-Google Refine lets you clean up the data and export your operation history as a JSON instruction set. Here is an example that extracts the year from the above dates:
+Refine Ruby lets you clean up the data and export your operation history as a JSON instruction set. Here is an example that extracts the year from the above dates:
 
 <pre>
 <code>
@@ -56,13 +56,15 @@ Google Refine lets you clean up the data and export your operation history as a 
 </code>
 </pre>
 
-You can use this gem to apply the operation set to the raw data from ruby. You will need to have Google Refine running on your local computer, or specify an external address (see source):
+You can use this gem to apply the operation set to the raw data from ruby. You will need to have openRefine running on your local computer, or specify an external address (see source):
 
 <pre>
   <code>
   require 'refine'
     prj = Refine.new('project_name' => 'date cleanup', 'file_name' => 'dates.txt')
     prj.apply_operations('operations.json')
+    prj.link_to_facets('Column 1' => ['invert', 'expression', 'name'])
+    prj.compute_facet('Column 1' => ['value'])
     puts prj.export_rows('csv')
     prj.delete_project
   </code>
@@ -78,6 +80,8 @@ Which outputs:
     2010
   </code>
 </pre>
+
+See test_refine.rb to see all the optional arguments for link_to_facets, and compute_facet methods.
 
 h2. Copyright
 
