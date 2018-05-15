@@ -6,7 +6,7 @@ require_relative '../lib/refine.rb'
 describe Refine do
 
   before do
-    @refine_project = Refine.new({ "project_name" => 'date_cleanup', "file_name" => './test/dates.txt' , "throws_exceptions" => false})
+    @refine_project = Refine.new({ "project_name" => 'date_cleanup', "file_name" => './test/dates.txt'})
   end
 
   describe "error handling" do
@@ -105,7 +105,7 @@ describe Refine do
 
       assert !params['ui'].nil?
 
-      facet_spec = JSON::parse(URI::decode(params['ui']))
+      facet_spec = JSON::parse(CGI::unescape(params['ui']))
       assert_equal 1, facet_spec.fetch("facets").length
 
       assert_equal "Date", facet_spec.fetch("facets").first.fetch("c").fetch("columnName")
@@ -259,7 +259,12 @@ describe Refine do
 
       it "Request with faulty expression" do
         response = @refine_project.compute_facet({"Column 1"=> ["iBlank(value)"]})
-        assert_equal("Error: Parsing error at offset 6: Unknown function or control named iBlank", response)
+        _(response).must_equal([{
+            "columnName"=>"Column 1",
+            "name"=>"Column 1",
+            "expression"=>"iBlank(value)",
+            "error"=>"Parsing error at offset 6: Unknown function or control named iBlank"
+          }])
       end
     end
 
