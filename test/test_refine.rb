@@ -6,7 +6,7 @@ require_relative '../lib/refine.rb'
 describe Refine do
 
   before do
-    @refine_project = Refine.new({ "project_name" => 'date_cleanup', "file_name" => './test/dates.txt' })
+    @refine_project = Refine.new({ "project_name" => 'date_cleanup', "file_name" => './test/dates.txt' , "throws_exceptions" => false})
   end
 
   describe "error handling" do
@@ -199,13 +199,62 @@ describe Refine do
 
     describe "compute_facets" do
       it "Request responds with error due to non existent column" do
-        response = @refine_project.compute_facet({"transcript_fiscal_year"=> ["isNonBlank(value)"]})
-        assert_equal("Error: No column named transcript_fiscal_year", response)
+        response = @refine_project.compute_facet({"Column 1"=> ["value"]}, {"transcript_fiscal_year"=> ["isNonBlank(value)"]})
+        _(response).must_equal ([{
+              "columnName" => "Column 1",
+              "name" => "Column 1",
+              "expression" => "value",
+              "choices" => [
+                {"value" => "7 December 2001",
+                 "label" => "7 December 2001",
+                 "count" => 1 ,
+                 "selected" => false},
+                 {"value" => "Date",
+                  "label" => "Date",
+                  "count" => 1 ,
+                  "selected" => false},
+                 {"value" => "July 1 2002",
+                  "label" => "July 1 2002",
+                  "count" => 1,
+                  "selected" => false},
+                {"value" => "10/20/10",
+                 "label" => "10/20/10",
+                 "count" => 1 ,
+                 "selected" => false}
+              ]
+            },{
+              "columnName" => "transcript_fiscal_year",
+              "name" => "transcript_fiscal_year",
+              "expression" => "isNonBlank(value)",
+              "error" => "No column named transcript_fiscal_year"
+              }])
       end
 
-      it "Request executes expression and sends response with the results" do
-        response = @refine_project.compute_facet({"Column 1"=> ["isNonBlank(value)"]})
-        assert_equal({true=>4}, response)
+      it "Request executes expression and cleans up the choices response formatting" do
+        response = @refine_project.compute_facet({"Column 1"=> ["value"]})
+        _(response).must_equal([{
+          "columnName" => "Column 1",
+          "name" => "Column 1",
+          "expression" => "value",
+          "choices" => [
+            {"value" => "7 December 2001",
+             "label" => "7 December 2001",
+             "count" => 1 ,
+             "selected" => false},
+             {"value" => "Date",
+              "label" => "Date",
+              "count" => 1 ,
+              "selected" => false},
+             {"value" => "July 1 2002",
+              "label" => "July 1 2002",
+              "count" => 1,
+              "selected" => false},
+            {"value" => "10/20/10",
+             "label" => "10/20/10",
+             "count" => 1 ,
+             "selected" => false}
+          ]
+        }])
       end
 
       it "Request with faulty expression" do
