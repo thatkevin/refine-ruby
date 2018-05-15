@@ -1,6 +1,8 @@
-<h1>google-refine</h1> is a Ruby Gem client library for "Google Refine":http://code.google.com/p/google-refine/
+<h1>google-refine</h1> is a Ruby Gem client library for "OpenRefine":http://openrefine.org.  It was written for Google Refine 2.x, but should work with OpenRefine as well.
 
 If you want to port this to another language, check out the "Refine API":https://github.com/maxogden/refine-python/wiki/Refine-API documentation.
+
+NOTE: The Refine client/server protocol is an internal API which is subject to change, so use at your own risk (although it has stayed relatively stable for the last few versions).
 
 h2. Install
 
@@ -58,7 +60,7 @@ You can use this gem to apply the operation set to the raw data from ruby. You w
 
 <pre>
   <code>
-    prj = Refine.new('date cleanup', 'dates.txt')
+    prj = Refine.new('project_name' => 'date cleanup', 'file_name' => 'dates.txt')
     prj.apply_operations('operations.json')
     puts prj.export_rows('csv')
     prj.delete_project
