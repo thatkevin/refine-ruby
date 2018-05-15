@@ -6,10 +6,11 @@ require 'refine/version'
 Gem::Specification.new do |s|
   s.name = %q{refine-ruby}
   s.version = Refine::VERSION
-  s.authors = ["Max Ogden", "Michael Bianco"]
+  s.authors = ["Caleb Buxton", "Allie Dukuze", "Max Ogden", "Michael Bianco"]
   s.summary = %q{Client library for interacting with Google Refine instances}
   s.description = %q{Client library for interacting with Google Refine instances. Easily work with CSVs from the command line}
-  s.email = ['max@maxogden.com', 'info@cliffsidedev.com']
+  s.email = %w{caleb+refine-ruby@distillanalytics.ca allie+refine-ruby@distillanalytics.ca}
+
   s.extra_rdoc_files = [
     "LICENSE",
     "README.textile"
