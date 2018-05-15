@@ -138,26 +138,24 @@ class Refine
         }
       end
 
-      json_facet = JSON::dump(facets: [formatted.first])
+      json_facet = JSON::dump(facets: formatted)
 
       openrefine_response = compute_facets("engine" => json_facet)
 
-      facet_response = openrefine_response.fetch("facets").first
+      openrefine_response.fetch("facets").map do |facet|
 
+        if facet.key?("choices")
 
+          choices_hash = facet.fetch("choices").map do |h|
+            Hash[%w(value label count selected).zip([h["v"]["v"], h["v"]["l"], h["c"], h["s"]])]
+          end
 
-      if facet_response.key?("choices")
+          Hash[%w(columnName name expression choices).zip([facet.fetch("columnName"), facet.fetch("name"), facet.fetch("expression"), choices_hash])]
+        elsif facet.key?("error")
 
-        choice_hash = facet_response.fetch("choices").map do |h|
-          Hash[%w(value label count selection).zip([h["v"]["v"], h["v"]["l"], h["c"], h["s"]])]
+          Hash[%w(columnName name expression error).zip([facet.fetch("columnName"), facet.fetch("name"), facet.fetch("expression"), facet.fetch("error")])]
         end
 
-        response = choice_hash.inject({}) do |hash, choice|
-          hash.merge(choice["value"] => choice["count"])
-        end
-
-      else
-      response = "Error: " + facet_response.fetch("error")
       end
 
     end
