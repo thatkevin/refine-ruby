@@ -28,11 +28,11 @@ Gem::Specification.new do |s|
   end
 
   s.add_dependency "addressable", '~> 2.5'
-  s.add_dependency "httpclient", "~> 2.1.6.1"
-  s.add_dependency "json", "~> 1.4.6"
+  s.add_dependency "httpclient", "~> 2.8.3"
+  s.add_dependency "json", "~> 2.1.0"
   s.add_development_dependency "bundler", "~> 1.10"
   s.add_development_dependency "minitest", "~> 5.11"
-  s.add_development_dependency "pry", "~> 11.3"
+  s.add_development_dependency "pry", "~> 0.11.3"
   s.add_development_dependency "rake", "~> 10.0"
 
 end
