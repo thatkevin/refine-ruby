@@ -7,8 +7,9 @@ NOTE: The Refine client/server protocol is an internal API which is subject to c
 h2. Install
 
 @gem install refine-ruby@
+h2. Examples
 
-h2. Example
+h3. Example 1: Apply Operations / Export Operations
 
 Given that you have the following raw data:
 
@@ -24,36 +25,36 @@ Given that you have the following raw data:
 Refine Ruby lets you clean up the data and export your operation history as a JSON instruction set. Here is an example that extracts the year from the above dates:
 
 <pre>
-<code>
-  [
-    {
-      "op": "core/text-transform",
-      "description": "Text transform on cells in column Date using expression grel:value.toDate()",
-      "engineConfig": {
-        "facets": [],
-        "mode": "row-based"
+  <code>
+    [
+      {
+        "op": "core/text-transform",
+        "description": "Text transform on cells in column Date using expression grel:value.toDate()",
+        "engineConfig": {
+          "facets": [],
+          "mode": "row-based"
+        },
+        "columnName": "Date",
+        "expression": "grel:value.toDate()",
+        "onError": "set-to-blank",
+        "repeat": false,
+        "repeatCount": 10
       },
-      "columnName": "Date",
-      "expression": "grel:value.toDate()",
-      "onError": "set-to-blank",
-      "repeat": false,
-      "repeatCount": 10
-    },
-    {
-      "op": "core/text-transform",
-      "description": "Text transform on cells in column Date using expression grel:value.datePart(\"year\")+1",
-      "engineConfig": {
-        "facets": [],
-        "mode": "row-based"
-      },
-      "columnName": "Date",
-      "expression": "grel:value.datePart(\"year\")",
-      "onError": "set-to-blank",
-      "repeat": false,
-      "repeatCount": 10
-    }
-  ]
-</code>
+      {
+        "op": "core/text-transform",
+        "description": "Text transform on cells in column Date using expression grel:value.datePart(\"year\")+1",
+        "engineConfig": {
+          "facets": [],
+          "mode": "row-based"
+        },
+        "columnName": "Date",
+        "expression": "grel:value.datePart(\"year\")",
+        "onError": "set-to-blank",
+        "repeat": false,
+        "repeatCount": 10
+      }
+    ]
+  </code>
 </pre>
 
 You can use this gem to apply the operation set to the raw data from ruby. You will need to have openRefine running on your local computer, or specify an external address (see source):
@@ -63,10 +64,7 @@ You can use this gem to apply the operation set to the raw data from ruby. You w
   require 'refine'
     prj = Refine.new('project_name' => 'date cleanup', 'file_name' => 'dates.txt')
     prj.apply_operations('operations.json')
-    prj.link_to_facets('Column 1' => ['invert', 'expression', 'name'])
-    prj.compute_facet('Column 1' => ['value'])
     puts prj.export_rows('csv')
-    prj.delete_project
   </code>
 </pre>
 
@@ -80,6 +78,53 @@ Which outputs:
     2010
   </code>
 </pre>
+
+h3. Example 2: Link to Facets
+
+Continuing on the project above - assuming 'project_id' = 1594197247031.
+Link to facets generates a link to the facets set up. The method can take an array of hashes, with the keys as the column name and the optional values: 'sort', 'invert', and a '<GREL expression>'.
+
+<pre>
+  <code>
+  require 'refine'
+    prj = Refine.new('project_id' => 1594197247031)
+    prj.link_to_facets('Date' => ['invert', 'isNonBlank(value)'])
+  </code>
+</pre>
+
+Which outputs:
+
+<pre>
+ "http://127.0.0.1:3333/project?project=1594197247031&ui=%7B%22facets%22%3A%5B%7B%22c%22%3A%7B%22columnName%22%3A%22Date%22%2C%22expression%22%3A%22value%22%2C%22name%22%3A%22Date%22%2C%22invert%22%3Atrue%7D%2C%22o%22%3A%7B%22sort%22%3A%22name%22%7D%7D%5D%7D"
+</pre>
+
+h3. Example 2: Compute Facet
+
+Compute facet returns a JSON object with meta info on the output of the column based on the GREL expression provided. The method can take an array of hashes with the keys as the column name and the optional values: 'sort', 'invert', and a '<GREL expression>'.
+<pre>
+  <code>
+      prj = Refine.new('project_id' => 1594197247031)
+      prj.compute_facet('Date' => ['value'])
+  </code>
+</pre>
+
+Which outputs:
+
+<pre>
+[
+  {
+    "columnName"=>"Date",
+    "name"=>"Date",
+    "expression"=>"value",
+    "choices"=>[
+        {"value"=>2002, "label"=>"2002", "count"=>1, "selected"=>false},
+        {"value"=>2001, "label"=>"2001", "count"=>1, "selected"=>false},
+        {"value"=>2010, "label"=>"2010", "count"=>1, "selected"=>false}
+    ]
+  }
+]
+</pre>
+
 
 See test_refine.rb to see all the optional arguments for link_to_facets, and compute_facet methods.
 
