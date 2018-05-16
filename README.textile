@@ -101,9 +101,8 @@ Which outputs:
 
 Screenshot:
 
-<pre>
-  !/img/link_to_facets_screenshot.png(OpenRefine)!
-</pre>
+!/img/link_to_facets_screenshot.png!
+
 
 h3. Compute Facet
 
