@@ -14,7 +14,8 @@ class Refine
     JSON.parse(response.body)
   end
 
-  def initialize(opts = {})
+  def initialize(opts = {}, &block)
+    @http_client_config = block
     @server = opts["server"] || "http://127.0.0.1:3333"
 
      @throws_exceptions = opts["throws_exceptions"] === false ? false : true
@@ -223,7 +224,7 @@ class Refine
     end
 
     def client
-      @client ||= HTTPClient.new()
+      @client ||= HTTPClient.new(&@http_client_config)
     end
 
 end
