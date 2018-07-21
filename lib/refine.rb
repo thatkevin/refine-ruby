@@ -2,7 +2,6 @@ require 'httpclient'
 require 'cgi'
 require 'json'
 require "addressable/uri"
-require 'pry'
 
 class Refine
   attr_reader :project_name
