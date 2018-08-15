@@ -39,7 +39,9 @@ class Refine
         'project-file' => file,
         'project-name' => project_name
       }
-      response = client.post(uri, body)
+
+      response = client.post(uri, body: body, header: {"Content-Type" => "multipart/form-data; charset=utf-8; boundary=#{create_boundary}"})
+
       url = response.header['Location']
       unless url == []
         project_id = CGI.parse(url[0].split('?')[1])['project'][0]
@@ -200,6 +202,11 @@ class Refine
   end
 
   protected
+
+    def create_boundary
+      Digest::SHA1.hexdigest(Time.now.to_s)
+    end
+
     def facet_opts(opts_array)
       if opts_array.is_a? String
         expression_present = opts_array.include? "value"
