@@ -4,6 +4,20 @@ require 'json'
 require "addressable/uri"
 
 class Refine
+  class ProjectNotFound < Exception
+    attr_reader :project_id, :server
+
+    def initialize(message, project_id:, server:)
+      super(message)
+      @project_id = project_id
+      @server = server
+    end
+
+    def to_s
+      super + " (#{@server})"
+    end
+  end
+
   attr_reader :project_name
   attr_reader :project_id
 
@@ -27,7 +41,11 @@ class Refine
       @project_id = opts["project_id"]
 
       metadata = self.get_project_metadata
-      @project_name = CGI.escape(metadata["name"])
+      if metadata['status'] == 'error'
+        raise ProjectNotFound.new(metadata['message'], project_id: @project_id, server: @server)
+      else
+        @project_name = CGI.escape(metadata["name"])
+      end
     end
   end
 
